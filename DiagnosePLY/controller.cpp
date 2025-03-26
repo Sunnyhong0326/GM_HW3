@@ -229,7 +229,6 @@ Eigen::Vector3f Controller::calculateNearPlanePoint(const double &x, const doubl
 
   return pt;
 }
-
 void Controller::saveScreenshot() {
   std::vector<unsigned char> pixels(screenWidth * screenHeight * 3);
   glReadPixels(0, 0, screenWidth, screenHeight, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
@@ -493,19 +492,45 @@ int Controller::selectEdges(const double &x, const double &y) {
 void Controller::selectNonManifoldEdge()
 {
     clearSelections();
-    //
+    Polyhedron* mesh = scene->getModel()->getPolyhedron();
+    for (int i = 0; mesh->nedges(); i++)
+    {
+        if (MeshProcessor::isNonManifoldEdge(mesh->elist[i]))
+        {
+            mesh->elist[i]->selected = true;
+        }
+    }
 }
 
 void Controller::selectNonManifoldVertex()
 {
     clearSelections();
-    //
+    Polyhedron* mesh = scene->getModel()->getPolyhedron();
+    for (int i = 0; mesh->nverts(); i++)
+    {
+        if (MeshProcessor::isNonManifoldVert(mesh->vlist[i]))
+        {
+            mesh->vlist[i]->selected = true;
+        }
+    }
 }
 
 void Controller::detectHoles()
 {
     clearSelections();
-    //
+    Polyhedron* mesh = scene->getModel()->getPolyhedron();
+    std::vector<std::vector<int>> holes;
+    MeshProcessor::detectHole(mesh, holes);
+    for (int i = 0; i < holes.size(); i++)
+    {
+        for (int j = 0; j < holes[i].size(); j++)
+        {
+            Edge* edge = mesh->elist[holes[i][j]];
+            edge->selected = true;
+            edge->verts[0]->selected = true;
+            edge->verts[1]->selected = true;
+        }
+    }
 }
 
 void Controller::computeGlobalInfo()

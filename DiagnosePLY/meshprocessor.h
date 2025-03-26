@@ -1,7 +1,5 @@
 #pragma once
 #include "learnply.h"
-#include <iostream>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -21,6 +19,11 @@ public:
                                     Eigen::Vector3f &out);
 
   // Gemotry 
+  static bool isNonManifoldVert(Vertex* vert);
+  static bool isNonManifoldEdge(Edge* edge);
+
+  static bool detectHole(Polyhedron* poly, std::vector<std::vector<int>>& holes);
+
   static void calcVertNormals(Polyhedron* poly);
   static void calcFaceNormalsAndArea(Polyhedron* poly);
   static void calcEdgeLength(Polyhedron* poly);
@@ -34,8 +37,8 @@ public:
   static double calcTotalAngularDeficit(Polyhedron* poly);
 
   static void calcGaussCurvature(Polyhedron* poly);
-  static void calcMeanCurvature(Polyhedron* poly);
   static Eigen::Vector3d calcMeanCurvatureNormal(Vertex* vert);
+  static void calcMeanCurvature(Polyhedron* poly);
   static void calcPrincipalCurvature(Polyhedron* poly);
 
   static void calcCurvatureTensor(Polyhedron* poly);

@@ -79,11 +79,33 @@ bool MeshProcessor::rayIntersectsTriangle(Eigen::Vector3f &rayOrigin, Eigen::Vec
   return t > EPSILON_RAY;
 }
 
+bool MeshProcessor::isNonManifoldVert(Vertex* vert)
+{
+    /// TODO: Implement 
+    ///
+    return false;
+}
+
+bool MeshProcessor::isNonManifoldEdge(Edge* edge)
+{
+    /// TODO: Implement 
+    ///
+    return false;
+}
+
+bool MeshProcessor::detectHole(Polyhedron* poly, std::vector<std::vector<int>>& holes)
+{
+    holes.clear();
+    /// TODO: Implement 
+    ///
+    return !holes.empty();
+}
+
 void MeshProcessor::calcInteriorAngle(Polyhedron* poly) {
     for (int i = 0; i < poly->ncorners(); i++) 
     {
         Corner* c = poly->clist[i];
-        ///
+        /// TODO: Implement 
         double interior_angle = 0.0;
         ///
         c->interior_angle = 0.0;
@@ -93,7 +115,7 @@ void MeshProcessor::calcInteriorAngle(Polyhedron* poly) {
 void MeshProcessor::calcDihedralAngle(Polyhedron* poly) {
     for (int i = 0; i < poly->nedges(); i++) {
         Edge* e = poly->elist[i];
-        ///
+        /// TODO: Implement 
         double dihedral_angle = 0.0;
         ///
         e->dihedral_angle = dihedral_angle;
@@ -103,7 +125,7 @@ void MeshProcessor::calcDihedralAngle(Polyhedron* poly) {
 void MeshProcessor::calcVertexArea(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
-        ///
+        /// TODO: Implement 
         double area = 0.0;
         ///
         vert_i->area = area;
@@ -111,28 +133,28 @@ void MeshProcessor::calcVertexArea(Polyhedron* poly) {
 }
 
 double MeshProcessor::calcVolume(Polyhedron* poly) {
-    ///
+    /// TODO: Implement 
     double volume = 0.0;
     ///
     return volume;
 }
 
 int MeshProcessor::calcEulerCharacteristic(Polyhedron* poly) {
-    ///
+    /// TODO: Implement 
     int euler = 0;
     ///
     return euler;
 }
 
 double MeshProcessor::calcAngularDeficit(Vertex* vert) {
-    /// 
+    ///  TODO: Implement 
     double deficit = 0.0;
     /// 
     return deficit;
 }
 
 double MeshProcessor::calcTotalAngularDeficit(Polyhedron* poly) {
-    ///
+    /// TODO: Implement 
     double totalAngularDeficit = 0.0;
     ///
     return totalAngularDeficit;
@@ -141,7 +163,7 @@ double MeshProcessor::calcTotalAngularDeficit(Polyhedron* poly) {
 void MeshProcessor::calcGaussCurvature(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
-        ///
+        /// TODO: Implement 
         double gauss = 0.0;
         ///
         vert_i->gaussCurvature = gauss;
@@ -151,7 +173,7 @@ void MeshProcessor::calcGaussCurvature(Polyhedron* poly) {
 
 Eigen::Vector3d MeshProcessor::calcMeanCurvatureNormal(Vertex* vert)
 {
-    ///
+    /// TODO: Implement 
     ///
     return Eigen::Vector3d(0.0, 0.0, 0.0);
 }
@@ -160,7 +182,7 @@ void MeshProcessor::calcMeanCurvature(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
         Eigen::Vector3d meanCurvatureNormal = calcMeanCurvatureNormal(vert_i);
-        //
+        // TODO: Implement 
         double meanCurvature = 0.0;
         //
         vert_i->meanCurvature = meanCurvature;
@@ -170,7 +192,7 @@ void MeshProcessor::calcMeanCurvature(Polyhedron* poly) {
 void MeshProcessor::calcPrincipalCurvature(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
-        ///
+        /// TODO: Implement 
         double k1 = 0.0;
         double k2 = 0.0;
         ///
@@ -192,7 +214,7 @@ void MeshProcessor::calcCurvatureTensor(Polyhedron* poly)
         for (int j = 0; j < vi->corners.size(); j++)
         {
             Vertex* vj = vi->corners[j]->next->vertex;
-            ///
+            /// TODO: Implement 
             //set matrix A
             matA(j, 0) = 0.0;
             matA(j, 1) = 0.0;
