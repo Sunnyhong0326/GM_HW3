@@ -539,10 +539,10 @@ void Controller::computeGlobalInfo()
     std::cout << "=== Global Geometry ===" << std::endl;
     // Get the starting time point
     auto start = std::chrono::high_resolution_clock::now();
-    //
     int euler = MeshProcessor::calcEulerCharacteristic(mesh);
     double deficit = MeshProcessor::calcTotalAngularDeficit(mesh);
-    double volumn  = MeshProcessor::calcVolume(mesh);
+    double volumn = MeshProcessor::calcVolume(mesh);
+    double area  = MeshProcessor::calcArea(mesh);
     // Get the ending time point
     auto end = std::chrono::high_resolution_clock::now();
     // Calculate the elapsed time in milliseconds
@@ -553,6 +553,7 @@ void Controller::computeGlobalInfo()
     std::cout << " Euler Characteristic: " << euler << std::endl;
     std::cout << " Total Angular Deficit: " << deficit << std::endl;
     std::cout << " Volume: " << volumn << std::endl;
+    std::cout << " Area: " << area << std::endl;
     std::cout << " Elapsed Time: " << elapsed.count() << " ms" << std::endl;
     std::cout << "=======================" << std::endl;
 }

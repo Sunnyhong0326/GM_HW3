@@ -5,36 +5,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-void MeshProcessor::calcVertNormals(Polyhedron *poly) {
-  for (int i = 0; i < poly->nverts(); i++) {
-    poly->vlist[i]->normal = Eigen::Vector3d(0.0, 0.0, 0.0);
-    for (int j = 0; j < poly->vlist[i]->ntris(); j++) {
-      poly->vlist[i]->normal += poly->vlist[i]->tris[j]->normal;
-    }
-    poly->vlist[i]->normal.normalize();
-  }
-}
-
-void MeshProcessor::calcFaceNormalsAndArea(Polyhedron *poly) {
-    for (int i = 0; i < poly->ntris(); i++) {
-        Vertex* v0 = poly->tlist[i]->verts[0];
-        Vertex* v1 = poly->tlist[i]->verts[1];
-        Vertex* v2 = poly->tlist[i]->verts[2];
-        poly->tlist[i]->normal = (v2->pos - v0->pos).cross(v1->pos - v0->pos);
-
-        poly->tlist[i]->area = poly->tlist[i]->normal.norm() * 0.5;
-        poly->tlist[i]->normal.normalize();
-    }
-}
-
-void MeshProcessor::calcEdgeLength(Polyhedron *poly) {
-  for (int i = 0; i < poly->nedges(); i++) {
-    Vertex* v0 = poly->elist[i]->verts[0];
-    Vertex* v1 = poly->elist[i]->verts[1];
-    poly->elist[i]->length = (v1->pos - v0->pos).norm();
-  }
-}
-
 /******************************************************************************
 Check if the given ray intersects the triangle
 
@@ -77,6 +47,37 @@ bool MeshProcessor::rayIntersectsTriangle(Eigen::Vector3f &rayOrigin, Eigen::Vec
   t = f * edge2.dot(q);
   out << u, v, t;
   return t > EPSILON_RAY;
+}
+
+void MeshProcessor::calcVertNormals(Polyhedron* poly) {
+    /// TODO: Weighted 
+    for (int i = 0; i < poly->nverts(); i++) {
+        poly->vlist[i]->normal = Eigen::Vector3d(0.0, 0.0, 0.0);
+        for (int j = 0; j < poly->vlist[i]->ntris(); j++) {
+            poly->vlist[i]->normal += poly->vlist[i]->tris[j]->normal;
+        }
+        poly->vlist[i]->normal.normalize();
+    }
+    ///
+}
+
+void MeshProcessor::calcFaceNormalsAndArea(Polyhedron* poly) {
+    for (int i = 0; i < poly->ntris(); i++) {
+        Vertex* v0 = poly->tlist[i]->verts[0];
+        Vertex* v1 = poly->tlist[i]->verts[1];
+        Vertex* v2 = poly->tlist[i]->verts[2];
+        poly->tlist[i]->normal = (v2->pos - v0->pos).cross(v1->pos - v0->pos);
+        poly->tlist[i]->area = poly->tlist[i]->normal.norm() * 0.5;
+        poly->tlist[i]->normal.normalize();
+    }
+}
+
+void MeshProcessor::calcEdgeLength(Polyhedron* poly) {
+    for (int i = 0; i < poly->nedges(); i++) {
+        Vertex* v0 = poly->elist[i]->verts[0];
+        Vertex* v1 = poly->elist[i]->verts[1];
+        poly->elist[i]->length = (v1->pos - v0->pos).norm();
+    }
 }
 
 bool MeshProcessor::isNonManifoldVert(Vertex* vert)
@@ -137,6 +138,15 @@ double MeshProcessor::calcVolume(Polyhedron* poly) {
     double volume = 0.0;
     ///
     return volume;
+}
+
+double MeshProcessor::calcArea(Polyhedron* poly)
+{
+    double area = 0.0;
+    for (int i = 0; i < poly->ntris(); i++) {
+        area += poly->tlist[i]->area;
+    }
+    return area;
 }
 
 int MeshProcessor::calcEulerCharacteristic(Polyhedron* poly) {
