@@ -67,7 +67,7 @@ private:
   // Components
   Scene *scene;
   std::unique_ptr<Trackball> trackball;
-  int selectionMode = (int)SelectType::None;
-  int colorMode = 0;
-  float colorMax = 100.0f;
+  int selectionMode;
+  int colorMode;
+  float colorMax;
 };

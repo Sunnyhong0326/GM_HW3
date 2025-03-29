@@ -104,7 +104,8 @@ void Controller::resetControl()
 {
     isComputed = false;
     colorMode = 0;
-    colorMax = 100.0f;
+    colorMax = 50.0f;
+    selectionMode = (int)SelectType::None;
 }
 
 void Controller::render() {
@@ -115,7 +116,6 @@ void Controller::render() {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
   ImGui::Begin("Control Panel", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-
   // Misc controls
   if (ImGui::CollapsingHeader("Misc.")) {
     if (ImGui::Button("Screenshot"))
@@ -126,7 +126,6 @@ void Controller::render() {
       importCameraPosition();
     ImGui::Separator();
   }
-
   // Visualization controls
   if (ImGui::CollapsingHeader("Visualization")) {
 
@@ -147,7 +146,7 @@ void Controller::render() {
     }
 
     ImGui::Text("Color Mode");
-    if (ImGui::Combo("##Color Mode", &colorMode, "None\0Gauss Curvature\0Mean Curvature\0Max Principle Curvature\0Min Principle Curvature")) {
+    if (ImGui::Combo("##Color Mode", &colorMode, "None\0Gauss Curvature\0Mean Curvature\0Max Principle Curvature\0Min Principle Curvature\0Area")) {
         if (isComputed)
         {
             meshRenderer->setColors(mesh, colorMode, (double)colorMax);
@@ -158,7 +157,7 @@ void Controller::render() {
     }
     // ColorMap
     {
-        ImGui::SliderFloat(" ", &colorMax, 0.0f, 1000.0f);
+        ImGui::SliderFloat(" ", &colorMax, 0.0f, 100.0f);
         meshRenderer->setColors(mesh, colorMode, (double)colorMax);
     }
     
@@ -542,7 +541,7 @@ void Controller::computeGlobalInfo()
     int euler = MeshProcessor::calcEulerCharacteristic(mesh);
     double deficit = MeshProcessor::calcTotalAngularDeficit(mesh);
     double volumn = MeshProcessor::calcVolume(mesh);
-    double area  = MeshProcessor::calcArea(mesh);
+    double area  = MeshProcessor::calcTotalFaceArea(mesh);
     // Get the ending time point
     auto end = std::chrono::high_resolution_clock::now();
     // Calculate the elapsed time in milliseconds

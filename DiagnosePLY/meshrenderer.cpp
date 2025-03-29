@@ -215,38 +215,49 @@ void MeshRenderer::setColors(Polyhedron* poly, int mode, double max_value)
 {
     if (mode >= 1 && mode <= 4)
     {
-        std::vector<double> data(poly->nverts());
         for (int i = 0; i < poly->nverts(); i++)
         {
+            double value = 0.0;
             switch (mode)
             {
             case 1:
-                data[i] = poly->vlist[i]->gaussCurvature;
+                value = poly->vlist[i]->gaussCurvature;
                 break;
             case 2:
-                data[i] = poly->vlist[i]->meanCurvature;
+                value = poly->vlist[i]->meanCurvature;
                 break;
             case 3:
-                data[i] = poly->vlist[i]->maxPrincCurvature;
+                value = poly->vlist[i]->maxPrincCurvature;
                 break;
             case 4:
-                data[i] = poly->vlist[i]->minPrincCurvature;
+                value = poly->vlist[i]->minPrincCurvature;
                 break;
             }
-        }
-        for (int i = 0; i < poly->nverts(); i++)
-        {
-            double value = abs(data[i]) / max_value * 0.5;
-            if (data[i] > 0.0)//[0.5,1.0]
-            { value = 0.5 + value; }
-            else
-            { value = 0.5 - value; }
+            if (value > 0.0) { 
+                value = 0.5 + abs(value / max_value) * 0.5; //[0.5,1.0]
+            }
+            else { 
+                value = 0.5 - abs(value / max_value) * 0.5; //[0.0,0.5]
+            }
             const tinycolormap::Color color = tinycolormap::GetColor(value, tinycolormap::ColormapType::Jet);
-            poly->vlist[i]->color = Eigen::Vector3f((float)color.r(), (float)color.g(), (float)color.b());
+            poly->vlist[i]->color <<
+                (float)color.r(),
+                (float)color.g(),
+                (float)color.b();
         }
     }
-    else if (mode == 5)
-    {
+    else if (mode == 5) {
+        for (int i = 0; i < poly->nverts(); i++)
+        {
+            double value = poly->vlist[i]->area * max_value;
+            const tinycolormap::Color color = tinycolormap::GetColor(value, tinycolormap::ColormapType::Github);
+            poly->vlist[i]->color <<
+                (float)color.g(),
+                (float)color.r(),
+                (float)color.b();
+        }
+    }
+    else if (mode == 6) {
         const float L = 0.05f;
         for (auto& vertex : poly->vlist) {
             float r = (int(vertex->pos.x() / L) % 2 == 0) ? 1.0f : 0.0f;

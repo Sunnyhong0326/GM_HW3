@@ -32,7 +32,8 @@ public:
   static void calcVertexArea(Polyhedron* poly);
 
   static double calcVolume(Polyhedron* poly);
-  static double calcArea(Polyhedron* poly);
+  static double calcTotalFaceArea(Polyhedron* poly);
+  static double calcTotalVertexArea(Polyhedron* poly);
   static int calcEulerCharacteristic(Polyhedron* poly);
   static double calcAngularDeficit(Vertex* vert);
   static double calcTotalAngularDeficit(Polyhedron* poly);

@@ -140,11 +140,20 @@ double MeshProcessor::calcVolume(Polyhedron* poly) {
     return volume;
 }
 
-double MeshProcessor::calcArea(Polyhedron* poly)
+double MeshProcessor::calcTotalFaceArea(Polyhedron* poly)
 {
     double area = 0.0;
     for (int i = 0; i < poly->ntris(); i++) {
         area += poly->tlist[i]->area;
+    }
+    return area;
+}
+
+double MeshProcessor::calcTotalVertexArea(Polyhedron* poly)
+{
+    double area = 0.0;
+    for (int i = 0; i < poly->nverts(); i++) {
+        area += poly->vlist[i]->area;
     }
     return area;
 }
