@@ -49,8 +49,17 @@ bool MeshProcessor::rayIntersectsTriangle(Eigen::Vector3f &rayOrigin, Eigen::Vec
   return t > EPSILON_RAY;
 }
 
+/******************************************************************************
+Calculate vertex normals for the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Vertex normals are calculated and stored in the polyhedron
+******************************************************************************/
 void MeshProcessor::calcVertNormals(Polyhedron* poly) {
-    /// TODO: Weighted 
+	/// TODO: Weighted the face normals by the angle at the vertex or the face area
     for (int i = 0; i < poly->nverts(); i++) {
         poly->vlist[i]->normal = Eigen::Vector3d(0.0, 0.0, 0.0);
         for (int j = 0; j < poly->vlist[i]->ntris(); j++) {
@@ -61,6 +70,15 @@ void MeshProcessor::calcVertNormals(Polyhedron* poly) {
     ///
 }
 
+/******************************************************************************
+Calculate face normals and area for the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Face normals and areas are calculated and stored in the triangles
+******************************************************************************/
 void MeshProcessor::calcFaceNormalsAndArea(Polyhedron* poly) {
     for (int i = 0; i < poly->ntris(); i++) {
         Vertex* v0 = poly->tlist[i]->verts[0];
@@ -72,6 +90,15 @@ void MeshProcessor::calcFaceNormalsAndArea(Polyhedron* poly) {
     }
 }
 
+/******************************************************************************
+Calculate edge lengths for the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Edge lengths are calculated and stored in the edges
+******************************************************************************/
 void MeshProcessor::calcEdgeLength(Polyhedron* poly) {
     for (int i = 0; i < poly->nedges(); i++) {
         Vertex* v0 = poly->elist[i]->verts[0];
@@ -80,66 +107,150 @@ void MeshProcessor::calcEdgeLength(Polyhedron* poly) {
     }
 }
 
+/******************************************************************************
+Check if the given vertex is non-manifold
+
+Entry:
+  vert - pointer to the vertex
+
+Exit:
+  return true if the vertex is non-manifold; otherwise, return false
+******************************************************************************/
 bool MeshProcessor::isNonManifoldVert(Vertex* vert)
 {
-    /// TODO: Implement 
-    ///
+	/// Implement:
+	/// 1. Check if the vertex is a cutting vertex
+	/// 2. Check if the vertex is a dangling vertex
     return false;
 }
 
+/******************************************************************************
+Check if the given edge is non-manifold
+
+Entry:
+  edge - pointer to the edge
+
+Exit:
+  return true if the edge is non-manifold; otherwise, return false
+******************************************************************************/
 bool MeshProcessor::isNonManifoldEdge(Edge* edge)
 {
-    /// TODO: Implement 
-    ///
+    /// Implement:
+    /// 1. Check if the vertex is a cutting edge
+    /// 2. Check if the vertex is a dangling edge (no incident face)
     return false;
 }
 
+/******************************************************************************
+Detect holes in the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+  holes - reference to a vector of vectors to store hole indices
+
+Exit:
+  return true if holes are detected; otherwise, return false
+******************************************************************************/
 bool MeshProcessor::detectHole(Polyhedron* poly, std::vector<std::vector<int>>& holes)
 {
     holes.clear();
-    /// TODO: Implement 
-    ///
+    /// Implement:
+	/// 1. Mark an edge if the edge is on the boundary
+    /// 2. Connect the marked edges into holes
+	/// 3. Store the edges indices in the vector (i.e., std::vector<int>)
+    /// 4. Store the hole in the vector (i.e., std::vector<std::vector<int>>)
     return !holes.empty();
 }
 
+/******************************************************************************
+Calculate interior angles for the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Interior angles are calculated and stored in the corners
+******************************************************************************/
 void MeshProcessor::calcInteriorAngle(Polyhedron* poly) {
     for (int i = 0; i < poly->ncorners(); i++) 
     {
         Corner* c = poly->clist[i];
-        /// TODO: Implement 
+        /// Implement:
+		/// Calculate the interior angle of the corner
+        /// Note use tan2
         double interior_angle = 0.0;
         ///
-        c->interior_angle = 0.0;
+        c->interior_angle = interior_angle;
     }
 }
 
+/******************************************************************************
+Calculate dihedral angles for the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Dihedral angles are calculated and stored in the edges
+******************************************************************************/
 void MeshProcessor::calcDihedralAngle(Polyhedron* poly) {
     for (int i = 0; i < poly->nedges(); i++) {
         Edge* e = poly->elist[i];
-        /// TODO: Implement 
+        /// Implement:
+        /// Calculate the dihedral angle of the corner
+        /// Note use tan2
         double dihedral_angle = 0.0;
         ///
         e->dihedral_angle = dihedral_angle;
     }
 }
 
+/******************************************************************************
+Calculate vertex areas for the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Vertex areas are calculated and stored in the vertices
+******************************************************************************/
 void MeshProcessor::calcVertexArea(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
-        /// TODO: Implement 
+        /// Implement:
+        /// Calculate the vertex area
         double area = 0.0;
         ///
         vert_i->area = area;
     }
 }
 
+/******************************************************************************
+Calculate the volume of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  return the calculated volume of the polyhedron
+******************************************************************************/
 double MeshProcessor::calcVolume(Polyhedron* poly) {
-    /// TODO: Implement 
+    /// Implement:
+    /// Calculate the volume
     double volume = 0.0;
     ///
     return volume;
 }
 
+/******************************************************************************
+Calculate the total face area of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  return the total face area of the polyhedron
+******************************************************************************/
 double MeshProcessor::calcTotalFaceArea(Polyhedron* poly)
 {
     double area = 0.0;
@@ -149,6 +260,15 @@ double MeshProcessor::calcTotalFaceArea(Polyhedron* poly)
     return area;
 }
 
+/******************************************************************************
+Calculate the total vertex area of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  return the total vertex area of the polyhedron
+******************************************************************************/
 double MeshProcessor::calcTotalVertexArea(Polyhedron* poly)
 {
     double area = 0.0;
@@ -158,60 +278,130 @@ double MeshProcessor::calcTotalVertexArea(Polyhedron* poly)
     return area;
 }
 
+/******************************************************************************
+Calculate the Euler characteristic of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  return the calculated Euler characteristic of the polyhedron
+******************************************************************************/
 int MeshProcessor::calcEulerCharacteristic(Polyhedron* poly) {
-    /// TODO: Implement 
+    /// Implement:
+	/// Calculate the Euler characteristic
     int euler = 0;
     ///
     return euler;
 }
 
+/******************************************************************************
+Calculate the angular deficit of the given vertex
+
+Entry:
+  vert - pointer to the vertex
+
+Exit:
+  return the calculated angular deficit of the vertex
+******************************************************************************/
 double MeshProcessor::calcAngularDeficit(Vertex* vert) {
-    ///  TODO: Implement 
+    /// Implement:
+	/// Calculate the angular deficit of the vertex
     double deficit = 0.0;
     /// 
     return deficit;
 }
 
+/******************************************************************************
+Calculate the total angular deficit of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  return the total angular deficit of the polyhedron
+******************************************************************************/
 double MeshProcessor::calcTotalAngularDeficit(Polyhedron* poly) {
-    /// TODO: Implement 
+    /// Implement:
+	/// Calculate the total angular deficit of the polyhedron
     double totalAngularDeficit = 0.0;
     ///
     return totalAngularDeficit;
 }
 
+/******************************************************************************
+Calculate the Gaussian curvature of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Gaussian curvature is calculated and stored in the vertices
+******************************************************************************/
 void MeshProcessor::calcGaussCurvature(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
-        /// TODO: Implement 
+        /// Implement:
+		/// Calculate the Gaussian curvature of the vertex
         double gauss = 0.0;
         ///
         vert_i->gaussCurvature = gauss;
     }
 }
 
+/******************************************************************************
+Calculate the mean curvature normal of the given vertex
 
+Entry:
+  vert - pointer to the vertex
+
+Exit:
+  return the calculated mean curvature normal of the vertex
+******************************************************************************/
 Eigen::Vector3d MeshProcessor::calcMeanCurvatureNormal(Vertex* vert)
 {
-    /// TODO: Implement 
+    /// Implement 
+	/// Calculate the mean curvature normal of the vertex
+    Eigen::Vector3d normal(0.0, 0.0, 0.0);
     ///
-    return Eigen::Vector3d(0.0, 0.0, 0.0);
+    return normal;
 }
 
+/******************************************************************************
+Calculate the mean curvature of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Mean curvature is calculated and stored in the vertices
+******************************************************************************/
 void MeshProcessor::calcMeanCurvature(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
-        Eigen::Vector3d meanCurvatureNormal = calcMeanCurvatureNormal(vert_i);
-        // TODO: Implement 
+        Eigen::Vector3d normal = calcMeanCurvatureNormal(vert_i);
+        /// Implement:
+		/// Calculate the mean curvature of the vertex
         double meanCurvature = 0.0;
-        //
+        ///
         vert_i->meanCurvature = meanCurvature;
     }
 }
 
+/******************************************************************************
+Calculate the principal curvature of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Principal curvature is calculated and stored in the vertices
+******************************************************************************/
 void MeshProcessor::calcPrincipalCurvature(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
-        /// TODO: Implement 
+        /// Implement:
+		/// Calculate the principal curvature of the vertex
         double k1 = 0.0;
         double k2 = 0.0;
         ///
@@ -220,6 +410,15 @@ void MeshProcessor::calcPrincipalCurvature(Polyhedron* poly) {
     }
 }
 
+/******************************************************************************
+Calculate the curvature tensor of the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  Curvature tensor and principal direction are calculated and stored in the vertex
+******************************************************************************/
 void MeshProcessor::calcCurvatureTensor(Polyhedron* poly)
 {
     for (int i = 0; i < poly->nverts(); i++) {
@@ -233,12 +432,12 @@ void MeshProcessor::calcCurvatureTensor(Polyhedron* poly)
         for (int j = 0; j < vi->corners.size(); j++)
         {
             Vertex* vj = vi->corners[j]->next->vertex;
-            /// TODO: Implement 
-            //set matrix A
+            /// Implement:
+            /// 1. Set matrix A
             matA(j, 0) = 0.0;
             matA(j, 1) = 0.0;
             matA(j, 2) = 0.0;
-            //set matrix K
+            /// 2. Set K
             k(j) = 0.0;
             ///
         }
@@ -265,6 +464,17 @@ void MeshProcessor::calcCurvatureTensor(Polyhedron* poly)
     }
 }
 
+/******************************************************************************
+Calculate the local frame of the given vertex
+
+Entry:
+  vi - pointer to the vertex
+  local_u - reference to store the local u vector
+  local_v - reference to store the local v vector
+
+Exit:
+  Local frame is calculated and stored in the references
+******************************************************************************/
 void MeshProcessor::calcVertLocalframe(Vertex* vi, Eigen::Vector3d& local_u, Eigen::Vector3d& local_v) {
     if (vi->corners.size() == 0) { return; }
     // Find edge with minimum projection distance to the vertex normal
