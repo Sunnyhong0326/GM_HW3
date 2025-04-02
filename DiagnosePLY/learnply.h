@@ -38,11 +38,23 @@ public:
   Vertex(Eigen::Vector3d &p)
       : index(-1), pos(p), color(Eigen::Vector3f(0.58f, 0.72f, 0.75f)),
         normal(Eigen::Vector3d(0.0, 0.0, 1.0)), selected(false),
-        area(0.0), gaussCurvature(0.0), meanCurvature(0.0), maxPrincCurvature(0.0), minPrincCurvature(0.0) {}
+        area(0.0), gaussCurvature(0.0), meanCurvature(0.0), maxPrincCurvature(0.0), minPrincCurvature(0.0), tensor(Eigen::Matrix2d::Identity())
+  {
+      princDir2D[0] << 1.0, 0.0;
+      princDir2D[1] << 0.0, 1.0;
+      princDir3D[0] << 1.0, 0.0, 0.0;
+      princDir3D[1] << 0.0, 1.0, 0.0;
+  }
   Vertex(double xx, double yy, double zz)
       : index(-1), pos(Eigen::Vector3d(xx, yy, zz)), color(Eigen::Vector3f(0.58f, 0.72f, 0.75f)),
         normal(Eigen::Vector3d(0.0, 0.0, 1.0)), selected(false),
-        area(0.0), gaussCurvature(0.0), meanCurvature(0.0), maxPrincCurvature(0.0), minPrincCurvature(0.0) {}
+        area(0.0), gaussCurvature(0.0), meanCurvature(0.0), maxPrincCurvature(0.0), minPrincCurvature(0.0), tensor(Eigen::Matrix2d::Identity())
+  {
+      princDir2D[0] << 1.0, 0.0;
+      princDir2D[1] << 0.0, 1.0;
+      princDir3D[0] << 1.0, 0.0, 0.0;
+      princDir3D[1] << 0.0, 1.0, 0.0;
+  }
 
   int ntris() { return (int)tris.size(); }
 };

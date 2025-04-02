@@ -426,41 +426,20 @@ void MeshProcessor::calcCurvatureTensor(Polyhedron* poly)
         //Least Square Fitting
         Eigen::MatrixXd matA(vi->corners.size(), 3);
         Eigen::VectorXd k(vi->corners.size()); //kij
-        Eigen::Vector3d local_u, local_v;
-        calcVertLocalframe(vi, local_u, local_v);
-        //Assign A and k
-        for (int j = 0; j < vi->corners.size(); j++)
-        {
-            Vertex* vj = vi->corners[j]->next->vertex;
-            /// Implement:
-            /// 1. Set matrix A
-            matA(j, 0) = 0.0;
-            matA(j, 1) = 0.0;
-            matA(j, 2) = 0.0;
-            /// 2. Set K
-            k(j) = 0.0;
-            ///
-        }
-        //Slove Ax = k
-        {
-            //Tensor: [l m; m n]
-            Eigen::VectorXd sol = matA.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(k);
-            double l = sol[0], m = sol[1], n = sol[2];
-            // Find two eigenvectors of matrix([[l,m], [m,n]]). They are the two principal directions.
-            vi->tensor(0, 0) = l;
-            vi->tensor(1, 1) = n;
-            vi->tensor(0, 1) = m;
-            vi->tensor(1, 0) = m;
-            double delta = sqrt((l - n) * (l - n) + 4.0 * (m * m));
-            vi->princDir2D[0] = Eigen::Vector2d(m, (-l + n - delta) * 0.5);
-            vi->princDir2D[1] = Eigen::Vector2d(m, (-l + n + delta) * 0.5);
-            vi->princDir3D[0] = vi->princDir2D[0].x() * local_u + vi->princDir2D[0].y() * local_v; // convert back to 3D
-            vi->princDir3D[1] = vi->princDir2D[1].x() * local_u + vi->princDir2D[1].y() * local_v; // convert back to 3D
-            vi->princDir2D[0].normalize();
-            vi->princDir2D[1].normalize();
-            vi->princDir3D[0].normalize();
-            vi->princDir3D[1].normalize();
-        }
+        Eigen::Vector3d e1, e2;
+        calcVertLocalframe(vi, e1, e2);
+        /// Implement:
+        /// 1. Assign A and k
+        /// 2. Slove Ax = k
+		/// 3. Compute Principal Direction
+        //vi->tensor(0, 0) = l;
+        //vi->tensor(1, 1) = n;
+        //vi->tensor(0, 1) = m;
+        //vi->tensor(1, 0) = m;
+        //vi->princDir2D[0] = v1;
+        //vi->princDir2D[1] = v2;
+        //vi->princDir3D[0] = d1;
+        //vi->princDir3D[1] = d2;
     }
 }
 
@@ -475,29 +454,30 @@ Entry:
 Exit:
   Local frame is calculated and stored in the references
 ******************************************************************************/
-void MeshProcessor::calcVertLocalframe(Vertex* vi, Eigen::Vector3d& local_u, Eigen::Vector3d& local_v) {
+void MeshProcessor::calcVertLocalframe(Vertex* vi, Eigen::Vector3d& e1, Eigen::Vector3d& e2) {
     if (vi->corners.size() == 0) { return; }
     // Find edge with minimum projection distance to the vertex normal
     double  minProj = DBL_MAX;
-    Vertex* minV = NULL;
+    Vertex* minVj = NULL;
     for (int j = 0; j < vi->corners.size(); j++)
     {
         Vertex* vj = vi->corners[j]->next->vertex;
-        Eigen::Vector3d vec = vj->pos - vi->pos;
-        double proj = fabs(vec.dot(vi->normal));
-        if (proj < minProj)
-        {
-            minProj = proj;
-            minV = vj;
-        }
+		/// Implement:
+		/// 1. Calculate the projection distance
+		/// 2. Find the edge with the minimum projection distance
+        /// 
     }
     // Calculate the local frame perpendicular to the vertex normal 
-    if (minV != NULL)
+    if (minVj != NULL)
     {
-        Eigen::Vector3d vec = minV->pos - vi->pos;
-        local_u = vec - vec.dot(vi->normal) * vi->normal;
-        local_u.normalize();
-        local_v = vi->normal.cross(local_u);
-        local_v.normalize();
+        /// Implement:
+		/// Calculate the local frame with vi and minVj
+        /// 
+    }
+    else
+    {
+		e1 << 1.0, 0.0, 0.0;
+        e2 = vi->normal.cross(e1);
+        e1 = vi->normal.cross(e2);
     }
 }
