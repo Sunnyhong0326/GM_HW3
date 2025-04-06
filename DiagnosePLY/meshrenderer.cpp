@@ -113,7 +113,6 @@ void MeshRenderer::setupBuffers(Polyhedron *poly) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
   }
-
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }
@@ -213,23 +212,46 @@ void MeshRenderer::setNormalMode(Polyhedron *poly, bool using_face_normal) {
 
 void MeshRenderer::setColors(Polyhedron* poly, int mode, double max_value)
 {
-    if (mode >= 1 && mode <= 4)
-    {
+    if (max_value < 0.001) { max_value = 0.001; }
+    if (mode == 1) {
+        for (int i = 0; i < poly->nverts(); i++)
+        {
+			int valence = MeshProcessor::calcVertValence(poly->vlist[i]);
+            double value = 0.5 + ((double)(valence - 6) / max_value) * 0.5;
+            const tinycolormap::Color color = tinycolormap::GetColor(value, tinycolormap::ColormapType::Jet);
+            poly->vlist[i]->color <<
+                (float)color.r(),
+                (float)color.g(),
+                (float)color.b();
+        }
+    }
+    else if (mode == 2) {
+        for (int i = 0; i < poly->nverts(); i++)
+        {
+            double value = poly->vlist[i]->area * 10000 / max_value;
+            const tinycolormap::Color color = tinycolormap::GetColor(value, tinycolormap::ColormapType::Hot);
+            poly->vlist[i]->color <<
+                (float)color.r(),
+                (float)color.g(),
+                (float)color.b();
+        }
+    }
+    else if(mode >= 3 && mode <= 6) {
         for (int i = 0; i < poly->nverts(); i++)
         {
             double value = 0.0;
-            switch (mode)
+            switch (mode - 3)
             {
-            case 1:
+            case 0:
                 value = poly->vlist[i]->gaussCurvature;
                 break;
-            case 2:
+            case 1:
                 value = poly->vlist[i]->meanCurvature;
                 break;
-            case 3:
+            case 2:
                 value = poly->vlist[i]->maxPrincCurvature;
                 break;
-            case 4:
+            case 3:
                 value = poly->vlist[i]->minPrincCurvature;
                 break;
             }
@@ -244,26 +266,6 @@ void MeshRenderer::setColors(Polyhedron* poly, int mode, double max_value)
                 (float)color.r(),
                 (float)color.g(),
                 (float)color.b();
-        }
-    }
-    else if (mode == 5) {
-        for (int i = 0; i < poly->nverts(); i++)
-        {
-            double value = poly->vlist[i]->area * max_value;
-            const tinycolormap::Color color = tinycolormap::GetColor(value, tinycolormap::ColormapType::Github);
-            poly->vlist[i]->color <<
-                (float)color.g(),
-                (float)color.r(),
-                (float)color.b();
-        }
-    }
-    else if (mode == 6) {
-        const float L = 0.05f;
-        for (auto& vertex : poly->vlist) {
-            float r = (int(vertex->pos.x() / L) % 2 == 0) ? 1.0f : 0.0f;
-            float g = (int(vertex->pos.y() / L) % 2 == 0) ? 1.0f : 0.0f;
-            float b = (int(vertex->pos.z() / L) % 2 == 0) ? 1.0f : 0.0f;
-            vertex->color = Eigen::Vector3f(r, g, b);
         }
     }
     else

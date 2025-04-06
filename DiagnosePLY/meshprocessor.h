@@ -29,7 +29,8 @@ public:
 
   static void calcVertNormals(Polyhedron* poly);
   static void calcVertArea(Polyhedron* poly);
-  static double calcAvgVertDegree(Polyhedron* poly);
+  static int calcVertValence(Vertex* vert);
+  static double calcAvgVertValence(Polyhedron* poly);
   static void calcFaceNormalsAndArea(Polyhedron* poly);
   static void calcEdgeLength(Polyhedron* poly);
   static void calcInteriorAngle(Polyhedron* poly);

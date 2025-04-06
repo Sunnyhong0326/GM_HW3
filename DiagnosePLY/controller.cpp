@@ -104,7 +104,7 @@ void Controller::resetControl()
 {
     isComputed = false;
     colorMode = 0;
-    colorMax = 50.0f;
+    colorMax = 20.0f;
     selectionMode = (int)SelectType::None;
 }
 
@@ -146,12 +146,12 @@ void Controller::render() {
     }
 
     ImGui::Text("Color Mode");
-    if (ImGui::Combo("##Color Mode", &colorMode, "None\0Gauss Curvature\0Mean Curvature\0Max Principle Curvature\0Min Principle Curvature\0Area")) {
+    if (ImGui::Combo("##Color Mode", &colorMode, "None\0Regularity\0Area\0Gauss Curvature\0Mean Curvature\0Max Principle Curvature\0Min Principle Curvature")) {
         if (isComputed)
         {
             meshRenderer->setColors(mesh, colorMode, (double)colorMax);
         }
-        else {
+        else if(colorMode > 2){
             colorMode = 0;
         }
     }
@@ -179,10 +179,10 @@ void Controller::render() {
   if (ImGui::CollapsingHeader("Selection")) {
     ImGui::Text("Selection Mode");
     ImGui::Combo("##Selection Mode", &selectionMode, "None\0Faces\0Vertices\0Edges\0");
-    if (ImGui::Button("Select Non-manifold Edges"))
-        selectNonManifoldEdge();
     if (ImGui::Button("Select Non-manifold Vertics"))
         selectNonManifoldVertex();
+    if (ImGui::Button("Select Non-manifold Edges"))
+        selectNonManifoldEdge();
     if (ImGui::Button("Detect Holes"))
         detectHoles();
     if (ImGui::Button("Clear Selections"))
@@ -542,7 +542,7 @@ void Controller::computeGlobalInfo()
     double deficit = MeshProcessor::calcTotalAngularDeficit(mesh);
     double volumn = MeshProcessor::calcVolume(mesh);
     double area = MeshProcessor::calcTotalFaceArea(mesh);
-    double deg = MeshProcessor::calcAvgVertDegree(mesh);
+    double deg = MeshProcessor::calcAvgVertValence(mesh);
     // Get the ending time point
     auto end = std::chrono::high_resolution_clock::now();
     // Calculate the elapsed time in milliseconds

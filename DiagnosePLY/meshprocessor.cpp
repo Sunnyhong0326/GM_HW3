@@ -246,25 +246,41 @@ void MeshProcessor::calcVertArea(Polyhedron* poly) {
 }
 
 /******************************************************************************
-Calculate the average vertex degree for the given polyhedron
+Calculate the vertex valence for the given vertex
+
+Entry:
+  vert - pointer to the vertex
+
+Exit:
+  return the average vertex valence of the polyhedron
+******************************************************************************/
+int MeshProcessor::calcVertValence(Vertex* vert)
+{
+
+    /// Implement:
+    /// Count the number of incient edges of the vertex
+    int count = 0;
+    ///
+    return count;
+}
+
+/******************************************************************************
+Calculate the average vertex valence for the given polyhedron
 
 Entry:
   poly - pointer to the polyhedron
 
 Exit:
-  return the average vertex degree of the polyhedron
+  return the average vertex valence of the polyhedron
 ******************************************************************************/
-double MeshProcessor::calcAvgVertDegree(Polyhedron* poly)
+double MeshProcessor::calcAvgVertValence(Polyhedron* poly)
 {
 	double avgDegree = 0.0;
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
-        /// Implement:
-        /// Count the number of incient edges of the vertex
-        avgDegree += 0.0;
-        ///
+        avgDegree += calcVertValence(vert_i);
     }
-    return avgDegree;
+    return avgDegree / (double)poly->nverts();
 }
 
 /******************************************************************************
