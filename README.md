@@ -70,7 +70,7 @@ https://drive.google.com/file/d/15KU4mqJIy1flMT16EO8w8zKPrB5mesF4/view?usp=shari
    - `calcVertLocalframe`  
    **[each 2 points]**
 
-4. Display the vertex area, Gaussian curvature, mean curvature, maximum principal curvature, and minimum principal curvature for `torus.ply` using color mapping modes. 
+4. Display the vertex area, Gaussian curvature, mean curvature, maximum/minimum principal curvature, and principal direction for `torus.ply` using color mapping modes. 
    Can you describe the local shape of the torus based on these curvature measures? **[3 points]**
 
 5. Apply the evaluations on `bunny1.ply`, `bunny2.ply`, and `bunny3.ply`:  
