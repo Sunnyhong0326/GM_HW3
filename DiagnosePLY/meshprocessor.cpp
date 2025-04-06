@@ -5,6 +5,26 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+void MeshProcessor::normalizeMesh(Polyhedron* poly, double scale)
+{
+    Eigen::Vector3d centroid(0.0, 0.0, 0.0);
+    for (int i = 0; i < poly->nverts(); i++) {
+        centroid += poly->vlist[i]->pos;
+    }
+    centroid /= (double)poly->nverts();
+    double max_dist = 0.0;
+    for (int i = 0; i < poly->nverts(); i++) {
+        double dist = (poly->vlist[i]->pos - centroid).squaredNorm();
+        if (dist > max_dist) {
+            max_dist = dist;
+        }
+    }
+    max_dist = std::max(sqrt(max_dist), 1e-6);
+    for (int i = 0; i < poly->nverts(); i++) {
+        poly->vlist[i]->pos = centroid + scale * (poly->vlist[i]->pos - centroid) / max_dist;
+    }
+}
+
 /******************************************************************************
 Check if the given ray intersects the triangle
 
@@ -214,7 +234,7 @@ Entry:
 Exit:
   Vertex areas are calculated and stored in the vertices
 ******************************************************************************/
-void MeshProcessor::calcVertexArea(Polyhedron* poly) {
+void MeshProcessor::calcVertArea(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert_i = poly->vlist[i];
         /// Implement:
@@ -223,6 +243,28 @@ void MeshProcessor::calcVertexArea(Polyhedron* poly) {
         ///
         vert_i->area = area;
     }
+}
+
+/******************************************************************************
+Calculate the average vertex degree for the given polyhedron
+
+Entry:
+  poly - pointer to the polyhedron
+
+Exit:
+  return the average vertex degree of the polyhedron
+******************************************************************************/
+double MeshProcessor::calcAvgVertDegree(Polyhedron* poly)
+{
+	double avgDegree = 0.0;
+    for (int i = 0; i < poly->nverts(); i++) {
+        Vertex* vert_i = poly->vlist[i];
+        /// Implement:
+        /// Count the number of incient edges of the vertex
+        avgDegree += 0.0;
+        ///
+    }
+    return avgDegree;
 }
 
 /******************************************************************************

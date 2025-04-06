@@ -541,7 +541,8 @@ void Controller::computeGlobalInfo()
     int euler = MeshProcessor::calcEulerCharacteristic(mesh);
     double deficit = MeshProcessor::calcTotalAngularDeficit(mesh);
     double volumn = MeshProcessor::calcVolume(mesh);
-    double area  = MeshProcessor::calcTotalFaceArea(mesh);
+    double area = MeshProcessor::calcTotalFaceArea(mesh);
+    double deg = MeshProcessor::calcAvgVertDegree(mesh);
     // Get the ending time point
     auto end = std::chrono::high_resolution_clock::now();
     // Calculate the elapsed time in milliseconds
@@ -553,6 +554,7 @@ void Controller::computeGlobalInfo()
     std::cout << " Total Angular Deficit: " << deficit << std::endl;
     std::cout << " Volume: " << volumn << std::endl;
     std::cout << " Area: " << area << std::endl;
+    std::cout << " Avg. Degree: " << deg << std::endl;
     std::cout << " Elapsed Time: " << elapsed.count() << " ms" << std::endl;
     std::cout << "=======================" << std::endl;
 }
