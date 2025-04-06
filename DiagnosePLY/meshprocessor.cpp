@@ -171,7 +171,7 @@ Entry:
 Exit:
   return true if holes are detected; otherwise, return false
 ******************************************************************************/
-bool MeshProcessor::detectHole(Polyhedron* poly, std::vector<std::vector<int>>& holes)
+bool MeshProcessor::findHoles(Polyhedron* poly, std::vector<std::vector<int>>& holes)
 {
     holes.clear();
     /// Implement:
@@ -243,44 +243,6 @@ void MeshProcessor::calcVertArea(Polyhedron* poly) {
         ///
         vert_i->area = area;
     }
-}
-
-/******************************************************************************
-Calculate the vertex valence for the given vertex
-
-Entry:
-  vert - pointer to the vertex
-
-Exit:
-  return the average vertex valence of the polyhedron
-******************************************************************************/
-int MeshProcessor::calcVertValence(Vertex* vert)
-{
-
-    /// Implement:
-    /// Count the number of incient edges of the vertex
-    int count = 0;
-    ///
-    return count;
-}
-
-/******************************************************************************
-Calculate the average vertex valence for the given polyhedron
-
-Entry:
-  poly - pointer to the polyhedron
-
-Exit:
-  return the average vertex valence of the polyhedron
-******************************************************************************/
-double MeshProcessor::calcAvgVertValence(Polyhedron* poly)
-{
-	double avgDegree = 0.0;
-    for (int i = 0; i < poly->nverts(); i++) {
-        Vertex* vert_i = poly->vlist[i];
-        avgDegree += calcVertValence(vert_i);
-    }
-    return avgDegree / (double)poly->nverts();
 }
 
 /******************************************************************************
@@ -362,7 +324,7 @@ Entry:
 Exit:
   return the calculated angular deficit of the vertex
 ******************************************************************************/
-double MeshProcessor::calcAngularDeficit(Vertex* vert) {
+double MeshProcessor::calcAngleDeficit(Vertex* vert) {
     /// Implement:
 	/// Calculate the angular deficit of the vertex
     double deficit = 0.0;
@@ -379,12 +341,48 @@ Entry:
 Exit:
   return the total angular deficit of the polyhedron
 ******************************************************************************/
-double MeshProcessor::calcTotalAngularDeficit(Polyhedron* poly) {
+double MeshProcessor::calcTotalAngleDeficit(Polyhedron* poly) {
     /// Implement:
 	/// Calculate the total angular deficit of the polyhedron
-    double totalAngularDeficit = 0.0;
+    double total_deficit = 0.0;
     ///
-    return totalAngularDeficit;
+    return total_deficit;
+}
+
+/******************************************************************************
+Calculate the vertex valence deficit for the given vertex
+
+Entry:
+  vert - pointer to the vertex
+
+Exit:
+  return the average vertex valence of the polyhedron
+******************************************************************************/
+int MeshProcessor::calcValenceDeficit(Vertex* vert)
+{
+    /// Implement:
+	/// Count the number of incient edges of the vertex and minus 6
+    int count = 0;
+    ///
+    return count;
+}
+
+/******************************************************************************
+Calculate the vertex valence for the given vertex
+
+Entry:
+  vert - pointer to the vertex
+
+Exit:
+  return the average vertex valence of the polyhedron
+******************************************************************************/
+int MeshProcessor::calcTotalValenceDeficit(Polyhedron* poly)
+{
+    /// Implement:
+    /// Calculate the total vertex valence deficit of the polyhedron
+    double total_deficit = 0.0;
+    ///
+    return total_deficit;
 }
 
 /******************************************************************************
@@ -483,19 +481,23 @@ void MeshProcessor::calcCurvatureTensor(Polyhedron* poly)
         Vertex* vi = poly->vlist[i];
         //Least Square Fitting
         Eigen::MatrixXd matA(vi->corners.size(), 3);
-        Eigen::VectorXd k(vi->corners.size()); //kij
+        Eigen::VectorXd vecK(vi->corners.size());
         Eigen::Vector3d e1, e2;
         calcVertLocalframe(vi, e1, e2);
         /// Implement:
         /// 1. Assign A and k
         /// 2. Slove Ax = k
 		/// 3. Compute Principal Direction
+        /// 
+        // Curvature Tensor
         //vi->tensor(0, 0) = l;
         //vi->tensor(1, 1) = n;
         //vi->tensor(0, 1) = m;
         //vi->tensor(1, 0) = m;
+        // Eigenvectors
         //vi->princDir2D[0] = v1;
         //vi->princDir2D[1] = v2;
+        // Principal Direction
         //vi->princDir3D[0] = d1;
         //vi->princDir3D[1] = d2;
     }

@@ -146,12 +146,13 @@ void Controller::render() {
     }
 
     ImGui::Text("Color Mode");
-    if (ImGui::Combo("##Color Mode", &colorMode, "None\0Regularity\0Area\0Gauss Curvature\0Mean Curvature\0Max Principle Curvature\0Min Principle Curvature")) {
+    if (ImGui::Combo("##Color Mode", &colorMode, "None\0Valance Deficit\0Angle Deficit\0Area\0Gauss Curvature\0Mean Curvature\0Max Principle Curvature\0Min Principle Curvature")) {
         if (isComputed)
         {
             meshRenderer->setColors(mesh, colorMode, (double)colorMax);
         }
-        else if(colorMode > 2){
+        else if(colorMode > 3)
+        {
             colorMode = 0;
         }
     }
@@ -300,7 +301,7 @@ void Controller::importCameraPosition(const std::string &filename) {
   scene->getCamera()->reset();
 
   Eigen::Vector3f position, target;
-  float fovy;
+  float fovy = 60.f;
   std::string line;
   std::string section;
 
@@ -519,7 +520,7 @@ void Controller::detectHoles()
     clearSelections();
     Polyhedron* mesh = scene->getModel()->getPolyhedron();
     std::vector<std::vector<int>> holes;
-    MeshProcessor::detectHole(mesh, holes);
+    MeshProcessor::findHoles(mesh, holes);
     for (int i = 0; i < holes.size(); i++)
     {
         for (int j = 0; j < holes[i].size(); j++)
@@ -539,10 +540,10 @@ void Controller::computeGlobalInfo()
     // Get the starting time point
     auto start = std::chrono::high_resolution_clock::now();
     int euler = MeshProcessor::calcEulerCharacteristic(mesh);
-    double deficit = MeshProcessor::calcTotalAngularDeficit(mesh);
+    double deficit = MeshProcessor::calcTotalAngleDeficit(mesh);
     double volumn = MeshProcessor::calcVolume(mesh);
     double area = MeshProcessor::calcTotalFaceArea(mesh);
-    double deg = MeshProcessor::calcAvgVertValence(mesh);
+    int valence = MeshProcessor::calcTotalValenceDeficit(mesh);
     // Get the ending time point
     auto end = std::chrono::high_resolution_clock::now();
     // Calculate the elapsed time in milliseconds
@@ -552,9 +553,9 @@ void Controller::computeGlobalInfo()
     std::cout << " #F: " << mesh->ntris() << std::endl;
     std::cout << " Euler Characteristic: " << euler << std::endl;
     std::cout << " Total Angular Deficit: " << deficit << std::endl;
+    std::cout << " Total Valence: " << valence << std::endl;
     std::cout << " Volume: " << volumn << std::endl;
     std::cout << " Area: " << area << std::endl;
-    std::cout << " Avg. Degree: " << deg << std::endl;
     std::cout << " Elapsed Time: " << elapsed.count() << " ms" << std::endl;
     std::cout << "=======================" << std::endl;
 }
@@ -595,7 +596,7 @@ void Controller::printVertGeometryInfo() {
       //
       if (isComputed) 
       { 
-          double deficit = MeshProcessor::calcAngularDeficit(vert_i);
+          double deficit = MeshProcessor::calcAngleDeficit(vert_i);
           std::cout << " Angular Deficit: " << deficit << std::endl;
           std::cout << " Mean Curvature: " << vert_i->meanCurvature << std::endl;
           std::cout << " Gauss Curvature: " << vert_i->gaussCurvature << std::endl;

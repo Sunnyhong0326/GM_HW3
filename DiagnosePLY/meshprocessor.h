@@ -25,23 +25,23 @@ public:
   static bool isNonManifoldVert(Vertex* vert);
   static bool isNonManifoldEdge(Edge* edge);
 
-  static bool detectHole(Polyhedron* poly, std::vector<std::vector<int>>& holes);
+  static bool findHoles(Polyhedron* poly, std::vector<std::vector<int>>& holes);
 
   static void calcVertNormals(Polyhedron* poly);
   static void calcVertArea(Polyhedron* poly);
-  static int calcVertValence(Vertex* vert);
-  static double calcAvgVertValence(Polyhedron* poly);
   static void calcFaceNormalsAndArea(Polyhedron* poly);
   static void calcEdgeLength(Polyhedron* poly);
   static void calcInteriorAngle(Polyhedron* poly);
   static void calcDihedralAngle(Polyhedron* poly);
-
   static double calcVolume(Polyhedron* poly);
   static double calcTotalFaceArea(Polyhedron* poly);
   static double calcTotalVertexArea(Polyhedron* poly);
+
   static int calcEulerCharacteristic(Polyhedron* poly);
-  static double calcAngularDeficit(Vertex* vert);
-  static double calcTotalAngularDeficit(Polyhedron* poly);
+  static double calcAngleDeficit(Vertex* vert);
+  static double calcTotalAngleDeficit(Polyhedron* poly);
+  static int calcValenceDeficit(Vertex* vert);
+  static int calcTotalValenceDeficit(Polyhedron* poly);
 
   static void calcGaussCurvature(Polyhedron* poly);
   static Eigen::Vector3d calcMeanCurvatureNormal(Vertex* vert);
