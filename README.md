@@ -4,10 +4,10 @@ https://drive.google.com/file/d/15KU4mqJIy1flMT16EO8w8zKPrB5mesF4/view?usp=shari
 
 ## Non-manifold Component Detection
 
-1. **Implement `isNonManifoldVert` in `MeshProcessor`** and demonstrate the non-manifold vertices of **nonmanifold.ply**. **[2 points]**
-2. **Implement `isNonManifoldEdge` in `MeshProcessor`** and demonstrate the non-manifold edges of **nonmanifold.ply**. **[2 points]**
-3. **Implement `findHoles` in `MeshProcessor`** and demonstrate the holes of **sphere_holes.ply**. **[2 points]**
-4. **What challenges in mesh processing can arise when dealing with non-manifold surfaces?** **[2 points]**
+1. Implement `isNonManifoldVert` in `MeshProcessor` and demonstrate the non-manifold vertices of `nonmanifold.ply`. **[2 points]**
+2. Implement `isNonManifoldEdge` in `MeshProcessor` and demonstrate the non-manifold edges of `nonmanifold.ply`. **[2 points]**
+3. Implement `findHoles` in `MeshProcessor` and demonstrate the holes of `sphere_holes.ply`. **[2 points]**
+4. What challenges in mesh processing can arise when dealing with non-manifold surfaces? **[2 points]**
 
 ## Topological Evaluation
 
