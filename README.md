@@ -17,7 +17,7 @@ https://drive.google.com/file/d/15KU4mqJIy1flMT16EO8w8zKPrB5mesF4/view?usp=shari
    - `calcTotalAngleDeficit`  
    - `calcValenceDeficit`  
    - `calcTotalValenceDeficit`  
-   **[each 2 points]**
+   **[each 1 points]**
 
    - The Euler Characteristic is given by  $V - E + F$
 
@@ -25,7 +25,7 @@ https://drive.google.com/file/d/15KU4mqJIy1flMT16EO8w8zKPrB5mesF4/view?usp=shari
 
    - The **angle deficit** of a vertex is defined as $2\pi$ minus the total angle around the vertex from all incident triangles; the **total angle deficit** of a model is the sum of the angle deficits of all vertices.
 
-2. Count the handles of the meshes and fill in the table below.** **[4 points]
+2. Count the handles of the meshes and fill in the table below.**[4 points]**
 
    | PLY         | V - E + F | Handles | Total valence deficit | Total angle deficit |
    |-------------|-----------|---------|-----------------------|---------------------|
@@ -56,19 +56,19 @@ https://drive.google.com/file/d/15KU4mqJIy1flMT16EO8w8zKPrB5mesF4/view?usp=shari
    - `calcVertArea`  
    - `calcInteriorAngle`  
    - `calcDihedralAngle`  
-   **[each 2 points]**
+   **[each 1 points]**
 
 2. Implement the following functions in `MeshProcessor`: 
    - `calcGaussCurvature`  
    - `calcMeanCurvatureNormal`  
    - `calcMeanCurvature`  
    - `calcPrincipalCurvature`  
-   **[each 2 points]**
+   **[each 1 points]**
 
 3. Implement the following functions in `MeshProcessor`:  
    - `calcCurvatureTensor`  
    - `calcVertLocalframe`  
-   **[each 2 points]**
+   **[each 1 points]**
 
 4. Display the vertex area, Gaussian curvature, mean curvature, maximum/minimum principal curvature, and principal direction for `torus.ply` using color mapping modes. 
    Can you describe the local shape of the torus based on these curvature measures? **[3 points]**
