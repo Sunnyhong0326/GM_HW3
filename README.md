@@ -25,7 +25,7 @@ https://drive.google.com/file/d/15KU4mqJIy1flMT16EO8w8zKPrB5mesF4/view?usp=shari
 
    - The **angle deficit** of a vertex is defined as $2\pi$ minus the total angle around the vertex from all incident triangles; the **total angle deficit** of a model is the sum of the angle deficits of all vertices.
 
-2. Count the handles of the meshes and fill in the table below.**[4 points]**
+2. Count the handles of the meshes and fill in the table below.**[2 points]**
 
    | PLY         | V - E + F | Handles | Total valence deficit | Total angle deficit |
    |-------------|-----------|---------|-----------------------|---------------------|
