@@ -116,6 +116,23 @@ void Controller::render() {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
   ImGui::Begin("Control Panel", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+  //
+  ImGui::Text("Selected Model");
+  const std::string& str = scene->modelNames[scene->selectedModel];
+  if (ImGui::BeginCombo("##Model", str.c_str())) {
+      for (int n = 0; n < scene->modelNames.size(); n++) {
+          bool is_selected = (scene->selectedModel == n);
+          if (ImGui::Selectable(scene->modelNames[n].c_str(), is_selected)) {
+              scene->loadModel(n);
+              resetControl();
+          }
+          if (is_selected) {
+              ImGui::SetItemDefaultFocus();
+          }
+      }
+      ImGui::EndCombo();
+  }
+  ImGui::Separator();
   // Misc controls
   if (ImGui::CollapsingHeader("Misc.")) {
     if (ImGui::Button("Screenshot"))
@@ -128,23 +145,6 @@ void Controller::render() {
   }
   // Visualization controls
   if (ImGui::CollapsingHeader("Visualization")) {
-
-    ImGui::Text("Selected Model");
-    const std::string &str = scene->modelNames[scene->selectedModel];
-    if (ImGui::BeginCombo("##Model", str.c_str())) {
-      for (int n = 0; n < scene->modelNames.size(); n++) {
-        bool is_selected = (scene->selectedModel == n);
-        if (ImGui::Selectable(scene->modelNames[n].c_str(), is_selected)) {
-          scene->loadModel(n);
-          resetControl();
-        }
-        if (is_selected) {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
-
     ImGui::Text("Color Mode");
     if (ImGui::Combo("##Color Mode", &colorMode, "None\0Valance Deficit\0Angle Deficit\0Area\0Gauss Curvature\0Mean Curvature\0Max Principle Curvature\0Min Principle Curvature")) {
         if (isComputed)
@@ -161,7 +161,6 @@ void Controller::render() {
         ImGui::SliderFloat(" ", &colorMax, 0.0f, 100.0f);
         meshRenderer->setColors(mesh, colorMode, (double)colorMax);
     }
-    
     if (ImGui::Checkbox("Flat Shading", &scene->drawFaceNormal)) {
       meshRenderer->setNormalMode(scene->getModel()->getPolyhedron(), scene->drawFaceNormal);
     }
