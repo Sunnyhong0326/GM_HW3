@@ -17,8 +17,8 @@ MeshRenderer::~MeshRenderer() {
 }
 
 void MeshRenderer::setupBuffers(Polyhedron *poly) {
-  const auto &triangles = MeshProcessor::getTriangles(poly);
-  const auto &edges = MeshProcessor::getEdges(poly);
+  const auto &triangles = poly->tlist;
+  const auto &edges = poly->elist;
 
   const size_t vertexDataSize = triangles.size() * 3 * 3;
   std::vector<float> vertexData(vertexDataSize);
@@ -133,7 +133,7 @@ void MeshRenderer::drawWireframe()
 }
 
 void MeshRenderer::updateColors(Polyhedron *poly) {
-  const auto& triangles = MeshProcessor::getTriangles(poly);
+  const auto& triangles = poly->tlist;
   std::vector<float> colorData(triangles.size() * 3 * 3, 0);
 
   size_t idx = 0;
@@ -166,7 +166,7 @@ void MeshRenderer::updateColors(Polyhedron *poly) {
 
 void MeshRenderer::setNormalMode(Polyhedron *poly, bool using_face_normal) {
 
-  const auto &triangles = MeshProcessor::getTriangles(poly);
+  const auto &triangles = poly->tlist;
 
   glBindBuffer(GL_ARRAY_BUFFER, NBO);
   if (!using_face_normal) {

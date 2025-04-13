@@ -3,52 +3,43 @@
 #include <string>
 #include <vector>
 
-class MeshProcessor {
-public:
-  MeshProcessor() = delete;
-
-  // Getters
-  static std::vector<Triangle *> &getTriangles(Polyhedron *poly) { return poly->tlist; }
-  static std::vector<Vertex *> &getVertices(Polyhedron *poly) { return poly->vlist; }
-  static std::vector<Edge *> &getEdges(Polyhedron *poly) { return poly->elist; }
-  static std::vector<Corner *> &getCorners(Polyhedron *poly) { return poly->clist; }
-
+namespace MeshProcessor {
   //Normalize Mesh
-  static void normalizeMesh(Polyhedron* poly, double scale = 1.0);
+  void normalizeMesh(Polyhedron* poly, double scale = 1.0);
 
   // Ray Testing
-  static bool rayIntersectsTriangle(Eigen::Vector3f &rayOrigin, Eigen::Vector3f &rayDirection,
-                                    Eigen::Vector3f &v0, Eigen::Vector3f &v1, Eigen::Vector3f &v2,
-                                    Eigen::Vector3f &out);
+  bool rayIntersectsTriangle(Eigen::Vector3f &rayOrigin, Eigen::Vector3f &rayDirection,
+                             Eigen::Vector3f &v0, Eigen::Vector3f &v1, Eigen::Vector3f &v2,
+                             Eigen::Vector3f &out);
 
   // Gemotry 
-  static bool isNonManifoldVert(Vertex* vert);
-  static bool isNonManifoldEdge(Edge* edge);
+  bool isNonManifoldVert(Vertex* vert);
+  bool isNonManifoldEdge(Edge* edge);
 
-  static bool findHoles(Polyhedron* poly, std::vector<std::vector<int>>& holes);
+  bool findHoles(Polyhedron* poly, std::vector<std::vector<int>>& holes);
 
-  static void calcVertNormals(Polyhedron* poly);
-  static void calcVertArea(Polyhedron* poly);
-  static void calcFaceNormalsAndArea(Polyhedron* poly);
-  static void calcEdgeLength(Polyhedron* poly);
-  static void calcInteriorAngle(Polyhedron* poly);
-  static void calcDihedralAngle(Polyhedron* poly);
-  static double calcVolume(Polyhedron* poly);
-  static double calcTotalFaceArea(Polyhedron* poly);
-  static double calcTotalVertexArea(Polyhedron* poly);
+  void calcVertNormals(Polyhedron* poly);
+  void calcVertArea(Polyhedron* poly);
+  void calcFaceNormalsAndArea(Polyhedron* poly);
+  void calcEdgeLength(Polyhedron* poly);
+  void calcInteriorAngle(Polyhedron* poly);
+  void calcDihedralAngle(Polyhedron* poly);
+  double calcVolume(Polyhedron* poly);
+  double calcTotalFaceArea(Polyhedron* poly);
+  double calcTotalVertexArea(Polyhedron* poly);
 
-  static int calcEulerCharacteristic(Polyhedron* poly);
-  static double calcAngleDeficit(Vertex* vert);
-  static double calcTotalAngleDeficit(Polyhedron* poly);
-  static int calcValenceDeficit(Vertex* vert);
-  static int calcTotalValenceDeficit(Polyhedron* poly);
+  int calcEulerCharacteristic(Polyhedron* poly);
+  double calcAngleDeficit(Vertex* vert);
+  double calcTotalAngleDeficit(Polyhedron* poly);
+  int calcValenceDeficit(Vertex* vert);
+  int calcTotalValenceDeficit(Polyhedron* poly);
 
-  static void calcGaussCurvature(Polyhedron* poly);
-  static Eigen::Vector3d calcMeanCurvatureNormal(Vertex* vert);
-  static void calcMeanCurvature(Polyhedron* poly);
-  static void calcPrincipalCurvature(Polyhedron* poly);
+  void calcGaussCurvature(Polyhedron* poly);
+  Eigen::Vector3d calcMeanCurvatureNormal(Vertex* vert);
+  void calcMeanCurvature(Polyhedron* poly);
+  void calcPrincipalCurvature(Polyhedron* poly);
 
-  static void calcCurvatureTensor(Polyhedron* poly);
-  static void calcVertLocalframe(Vertex* vert, Eigen::Vector3d& local_u, Eigen::Vector3d& local_v);
+  void calcCurvatureTensor(Polyhedron* poly);
+  void calcVertLocalframe(Vertex* vert, Eigen::Vector3d& local_u, Eigen::Vector3d& local_v);
 
 };

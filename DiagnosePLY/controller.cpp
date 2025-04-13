@@ -355,8 +355,8 @@ int Controller::selectFaces(const double &x, const double &y) {
 
   // Get mesh data structures
   Polyhedron *mesh = scene->getModel()->getPolyhedron();
-  const std::vector<Triangle *> &triangles = MeshProcessor::getTriangles(mesh);
-  const std::vector<Vertex *> &vertices = MeshProcessor::getVertices(mesh);
+  const std::vector<Triangle *> &triangles = mesh->tlist;
+  const std::vector<Vertex *> &vertices = mesh->vlist;
 
   int tidx = -1;
   // Setup ray origin and direction for intersection test
@@ -402,8 +402,8 @@ int Controller::selectFaces(const double &x, const double &y) {
 int Controller::selectVertices(const double &x, const double &y) {
   Eigen::Vector3f pt = calculateNearPlanePoint(x, y, screenHeight, scene->getCamera());
   Polyhedron *mesh = scene->getModel()->getPolyhedron();
-  const std::vector<Triangle *> &triangles = MeshProcessor::getTriangles(mesh);
-  const std::vector<Vertex *> &vertices = MeshProcessor::getVertices(mesh);
+  const std::vector<Triangle *> &triangles = mesh->tlist;
+  const std::vector<Vertex *> &vertices = mesh->vlist;
   int tidx = -1;
   Eigen::Vector3f cam_org = scene->getCamera()->position();
   Eigen::Vector3f cam_dir = (pt - cam_org).normalized();
@@ -444,8 +444,8 @@ int Controller::selectVertices(const double &x, const double &y) {
 int Controller::selectEdges(const double &x, const double &y) {
   Eigen::Vector3f pt = calculateNearPlanePoint(x, y, screenHeight, scene->getCamera());
   Polyhedron *mesh = scene->getModel()->getPolyhedron();
-  const std::vector<Triangle *> &triangles = MeshProcessor::getTriangles(mesh);
-  const std::vector<Vertex *> &vertices = MeshProcessor::getVertices(mesh);
+  const std::vector<Triangle *> &triangles = mesh->tlist;
+  const std::vector<Vertex *> &vertices = mesh->vlist;
   int tidx = -1;
   Eigen::Vector3f cam_org = scene->getCamera()->position();
   Eigen::Vector3f cam_dir = (pt - cam_org).normalized();
