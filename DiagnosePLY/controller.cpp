@@ -180,24 +180,23 @@ void Controller::render() {
   if (ImGui::CollapsingHeader("Selection")) {
     ImGui::Text("Selection Mode");
     ImGui::Combo("##Selection Mode", &selectionMode, "None\0Faces\0Vertices\0Edges\0");
-    if (ImGui::Button("Select Non-manifold Vertics"))
-        selectNonManifoldVertex();
-    if (ImGui::Button("Select Non-manifold Edges"))
-        selectNonManifoldEdge();
-    if (ImGui::Button("Detect Holes"))
-        detectHoles();
-    if (ImGui::Button("Clear Selections"))
-        clearSelections();
-    ImGui::Separator();
     if (ImGui::Button("Print Selected Vertex Info"))
         printVertGeometryInfo();
     if (ImGui::Button("Print Selected Edge Info"))
         printEdgeGeometryInfo();
     if (ImGui::Button("Print Selected Face Info"))
         printFaceGeometryInfo();
+    if (ImGui::Button("Clear Selections"))
+        clearSelections();
   }
 
   ImGui::Separator();
+  if (ImGui::Button("Detect Non-manifold Vertics"))
+      selectNonManifoldVertex();
+  if (ImGui::Button("Detect Non-manifold Edges"))
+      selectNonManifoldEdge();
+  if (ImGui::Button("Detect Holes"))
+      detectHoles();
   if (ImGui::Button("Compute Global Geometry"))
       computeGlobalInfo();
   if (ImGui::Button("Compute Curvature"))
