@@ -491,7 +491,7 @@ void Controller::selectNonManifoldEdge()
 {
     clearSelections();
     Polyhedron* mesh = scene->getModel()->getPolyhedron();
-    for (int i = 0; mesh->nedges(); i++)
+    for (int i = 0; i < mesh->nedges(); i++)
     {
         if (MeshProcessor::isNonManifoldEdge(mesh->elist[i]))
         {
@@ -504,7 +504,7 @@ void Controller::selectNonManifoldVertex()
 {
     clearSelections();
     Polyhedron* mesh = scene->getModel()->getPolyhedron();
-    for (int i = 0; mesh->nverts(); i++)
+    for (int i = 0; i < mesh->nverts(); i++)
     {
         if (MeshProcessor::isNonManifoldVert(mesh->vlist[i]))
         {
