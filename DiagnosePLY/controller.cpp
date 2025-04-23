@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <stdio.h>
 
 Controller::Controller(int width, int height, GLFWwindow *window, Scene *scenePtr)
