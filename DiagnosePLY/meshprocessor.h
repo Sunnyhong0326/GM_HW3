@@ -41,5 +41,5 @@ namespace MeshProcessor {
 
   void calcCurvatureTensor(Polyhedron* poly);
   void calcVertLocalframe(Vertex* vert, Eigen::Vector3d& local_u, Eigen::Vector3d& local_v);
-
+  bool sharesVertex(Triangle* a, Triangle* b, Vertex* v);
 };

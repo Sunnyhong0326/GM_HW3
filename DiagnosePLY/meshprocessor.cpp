@@ -82,6 +82,14 @@ Exit:
   Vertex normals are calculated and stored in the polyhedron
 ******************************************************************************/
 void MeshProcessor::calcVertNormals(Polyhedron* poly) {
+    /*for (int i = 0; i < poly->nverts(); i++) {
+        poly->vlist[i]->normal = Eigen::Vector3d(0.0, 0.0, 0.0);
+        for (int j = 0; j < poly->vlist[i]->ntris(); j++) {
+            poly->vlist[i]->normal += poly->vlist[i]->tris[j]->normal;
+        }
+        poly->vlist[i]->normal.normalize();
+    }*/
+
 	/// TODO: Weighted the face normals by the angle at the vertex or the face area
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vert = poly->vlist[i];
@@ -94,11 +102,17 @@ void MeshProcessor::calcVertNormals(Polyhedron* poly) {
             if (!tri) continue;
 
             // Calculate the face normal (triangle normal)
-            Eigen::Vector3d v0 = tri->corners[0]->vertex->pos;
-            Eigen::Vector3d v1 = tri->corners[1]->vertex->pos;
-            Eigen::Vector3d v2 = tri->corners[2]->vertex->pos;
+            Eigen::Vector3d v1;
+            Eigen::Vector3d v2;
+            Eigen::Vector3d v0 = vert->pos;
+            for (int i = 0; i < 3; i++) {
+                if (vert->index == tri->verts[i]->index) {
+                    v1 = tri->verts[(i + 1) % 3]->pos;
+                    v2 = tri->verts[(i + 2) % 3]->pos;
+                }
+            }
 
-            Eigen::Vector3d face_normal = (v1 - v0).cross(v2 - v0).normalized();
+            Eigen::Vector3d face_normal = tri->normal;
 
             // Optionally weight by face area or angle
             double area = 0.5 * (v1 - v0).cross(v2 - v0).norm();
@@ -162,8 +176,6 @@ Exit:
 ******************************************************************************/
 bool MeshProcessor::isNonManifoldVert(Vertex* vert)
 {
-    if (!vert) return false;
-
     // 1. Dangling vertex: fewer than 2 triangles
     //if (vert->tris.size() < 2)
     //    return true;
@@ -171,37 +183,41 @@ bool MeshProcessor::isNonManifoldVert(Vertex* vert)
     // 2. Cutting vertex: check if connected triangles form one fan
     // Use corner connectivity to traverse the triangle fan
 
+    if (!vert || vert->corners.empty())
+        return true; // Dangling (no corners = no incident faces)
+
     std::unordered_set<Triangle*> visited;
     std::queue<Corner*> q;
+    q.push(vert->corners[0]->next);
+    visited.insert(vert->corners[0]->next->tri);
 
-    // Start with the first corner
-    // if (vert->corners.empty()) return true;  // No corners: invalid
-    q.push(vert->corners[0]);
-    visited.insert(vert->corners[0]->tri);
-
+    // BFS to visit all connected faces around the vertex
     while (!q.empty()) {
-        Corner* c = q.front(); q.pop();
+        Corner* c = q.front();
+        q.pop();
 
-        // Look around the fan: prev and next corners lead to adjacent corners
-        for (Corner* dir : { c->prev, c->next }) {
-            if (dir && dir->vertex == vert) {
-                Corner* opp = dir->oppsite;
-                if (opp && opp->vertex == vert) {
-                    Triangle* neighborTri = opp->tri;
-                    if (visited.count(neighborTri) == 0) {
-                        visited.insert(neighborTri);
-                        q.push(opp);
-                    }
-                }
-            }
+        if (!c->oppsite) continue;
+        Corner* opp = c->oppsite->prev;
+        if (opp && visited.find(opp->tri) == visited.end()) {
+            visited.insert(opp->tri);
+            q.push(opp);
         }
     }
 
-    // If we didn't visit all triangles the vertex belongs to, it's a cutting vertex
-    if (visited.size() != vert->tris.size())
-        return true;
+    // If the number of visited triangles is less than the number of incident triangles, it's non-manifold
+    int totalIncidentFaces = vert->corners.size();
+    if ((int)visited.size() != totalIncidentFaces)
+        return true; // Cutting vertex
 
-    return false; // It's manifold
+    return false;
+}
+
+bool MeshProcessor::sharesVertex(Triangle* a, Triangle* b, Vertex* v)
+{
+    if (a == b) return false;
+    for (int i = 0; i < 3; ++i)
+        if (a->verts[i] == v) return true;
+    return false;
 }
 
 /******************************************************************************
@@ -218,7 +234,28 @@ bool MeshProcessor::isNonManifoldEdge(Edge* edge)
     /// Implement:
     /// 1. Check if the vertex is a cutting edge
     /// 2. Check if the vertex is a dangling edge (no incident face)
-    return false;
+    if (!edge) return false;
+
+    // 1. Dangling edge check
+    if (edge->corners.empty()) {
+        return true; // no incident face
+    }
+
+    // 2. Cutting edge check: count how many triangles use this edge
+    std::unordered_set<Triangle*> adjacentTriangles;
+
+    for (Corner* c : edge->corners) {
+        if (c && c->tri) {
+            adjacentTriangles.insert(c->tri);
+        }
+    }
+
+    // If more than 2 triangles share the same edge => non-manifold
+    if (adjacentTriangles.size() > 2) {
+        return true;
+    }
+
+    return false; // manifold edge
 }
 
 /******************************************************************************
@@ -233,12 +270,80 @@ Exit:
 ******************************************************************************/
 bool MeshProcessor::findHoles(Polyhedron* poly, std::vector<std::vector<int>>& holes)
 {
-    holes.clear();
     /// Implement:
 	/// 1. Mark an edge if the edge is on the boundary
-    /// 2. Connect the marked edges into holes
+    /// 2. Connect the marked edges into holes    
 	/// 3. Store the edges indices in the vector (i.e., std::vector<int>)
     /// 4. Store the hole in the vector (i.e., std::vector<std::vector<int>>)
+    holes.clear();
+    if (!poly) return false;
+
+    std::unordered_set<Edge*> boundaryEdges;
+
+    // 1. Mark edges that are on the boundary
+    for (int i = 0; i < poly->nedges(); ++i) {
+        Edge* edge = poly->elist[i];
+
+        // Boundary edge has only one adjacent face
+        int count = 0;
+        for (Corner* c : edge->corners) {
+            if (c && c->tri) ++count;
+        }
+
+        if (count == 1) {
+            boundaryEdges.insert(edge);
+        }
+    }
+
+    // Step 2: Build vertex-to-boundary-edges map
+    std::unordered_map<Vertex*, std::vector<Edge*>> vertexToBoundaryEdges;
+    for (Edge* edge : boundaryEdges) {
+        vertexToBoundaryEdges[edge->verts[0]].push_back(edge);
+        vertexToBoundaryEdges[edge->verts[1]].push_back(edge);
+    }
+
+    // Step 3: Traverse boundary edges to find holes
+    std::unordered_set<Edge*> visited;
+    while (!boundaryEdges.empty()) {
+        Edge* startEdge = *boundaryEdges.begin();
+        boundaryEdges.erase(startEdge);
+        visited.insert(startEdge);
+
+        std::vector<int> hole;
+
+        Vertex* startV = startEdge->verts[0];
+        Vertex* currV = startV;
+        Edge* currE = startEdge;
+
+        hole.push_back(startEdge->index);
+        while (true) {
+            // Step forward
+            Vertex* nextV = (currE->verts[0] == currV) ? currE->verts[1] : currE->verts[0];
+
+            // Look for the next unvisited boundary edge connected to nextV
+            Edge* nextE = nullptr;
+            for (Edge* e : vertexToBoundaryEdges[nextV]) {
+                if (e != currE && !visited.count(e)) {
+                    hole.push_back(e->index);
+                    nextE = e;
+                    break;
+                }
+            }
+
+            if (!nextE) break; // open hole
+            visited.insert(nextE);
+            boundaryEdges.erase(nextE);
+
+            currV = nextV;
+            currE = nextE;
+
+            if (currV == startV) break; // closed loop
+        }
+
+        if (hole.size() > 2)
+            holes.push_back(hole);
+    }
+
     return !holes.empty();
 }
 
@@ -257,16 +362,33 @@ void MeshProcessor::calcInteriorAngle(Polyhedron* poly) {
 
         // Get the two edges at the corner (each corner belongs to one edge)
         Vertex* v0 = c->vertex;               // Vertex of the corner
-        Edge* edge1 = c->next->edge;                 // First edge at the corner
-        Edge* edge2 = c->next->next->edge;           // Next edge at the corner (adjacent corner's edge)
+        Edge* c_edge = c->edge;
+
+        Edge* edge1;           // First edge at the corner
+        Edge* edge2;           // Next edge at the corner (adjacent corner's edge)
+        for (int i = 0; i < 3; i++) {
+            if (c_edge->index == c->tri->edges[i]->index) {
+                edge1 = c->tri->edges[(i + 1) % 3];
+                edge2 = c->tri->edges[(i + 2) % 3];
+            }
+        }
 
         // Calculate the direction vectors of the two edges
-        Eigen::Vector3d vector1 = edge1->verts[1]->pos - v0->pos;  // Direction of edge 1
-        Eigen::Vector3d vector2 = edge2->verts[1]->pos - v0->pos;  // Direction of edge 2
+        Eigen::Vector3d vector1(0, 0, 0);
+        Eigen::Vector3d vector2(0, 0, 0);
+        if (edge1->verts[0]->index == v0->index)
+            vector1 = edge1->verts[1]->pos - v0->pos;  // Direction of edge 1
+        else
+            vector1 = edge1->verts[0]->pos - v0->pos;  // Direction of edge 1
+
+        if (edge2->verts[0]->index == v0->index)
+            vector2 = edge2->verts[1]->pos - v0->pos;  // Direction of edge 2
+        else
+            vector2 = edge2->verts[0]->pos - v0->pos;  // Direction of edge 2
 
         // Calculate the interior angle between the two vectors
-        double cross_product = vector1.cross(vector2).norm();  // |u x v| (magnitude of cross product)
-        double dot_product = vector1.dot(vector2);            // u . v (dot product)
+        double cross_product = vector2.cross(vector1).norm();  // |u x v| (magnitude of cross product)
+        double dot_product = vector2.dot(vector1);            // u . v (dot product)
 
         // Calculate the angle using atan2 (cross product magnitude, dot product)
         double interior_angle = std::atan2(cross_product, dot_product);
@@ -288,7 +410,8 @@ Exit:
 void MeshProcessor::calcDihedralAngle(Polyhedron* poly) {
     for (int i = 0; i < poly->nedges(); i++) {
         Edge* e = poly->elist[i];
-
+        if (e->tris.size() < 2)
+            continue;
         // Get the two triangles (faces) that share the edge
         Triangle* t1 = e->tris[0];  // First triangle sharing the edge
         Triangle* t2 = e->tris[1];  // Second triangle sharing the edge
@@ -298,8 +421,8 @@ void MeshProcessor::calcDihedralAngle(Polyhedron* poly) {
         Vertex* v2 = e->verts[1];  // Second vertex of the edge
 
         // Compute the normal vector for each triangle (face)
-        Eigen::Vector3d normal1 = (t1->verts[1]->pos - t1->verts[0]->pos).cross(t1->verts[2]->pos - t1->verts[0]->pos);
-        Eigen::Vector3d normal2 = (t2->verts[1]->pos - t2->verts[0]->pos).cross(t2->verts[2]->pos - t2->verts[0]->pos);
+        Eigen::Vector3d normal1 = t1->normal;
+        Eigen::Vector3d normal2 = t2->normal;
 
         // Normalize the normal vectors
         normal1.normalize();
@@ -336,56 +459,24 @@ void MeshProcessor::calcVertArea(Polyhedron* poly) {
     for (int i = 0; i < poly->nverts(); i++) {
         Vertex* vi = poly->vlist[i];
         double area = 0.0;
-        /*
         
-        for (Corner* corner_i : vi->corners) {
-            Corner* cornerbeta = corner_i->next;
-            Corner* corneralpha = corner_i->next->oppsite;
-            Edge* eij = corner_i->next->edge;
-            Triangle* tri = corner_i->tri;
+        for (Corner* cor : vi->corners) {
+            Triangle* tri = cor->tri;
+            Corner* corner_j = cor->next;
+            Corner* corner_k = cor->prev;
 
-            double angle_i = corner_i->interior_angle;
-            double angle_alpha = corneralpha->interior_angle;
-            double angle_beta = cornerbeta->interior_angle;
+            double angle_i = cor->interior_angle;
+            double angle_j = corner_j->interior_angle; // beta
+            double angle_k = corner_k->interior_angle; // alpha
 
-            double cot_beta = 1 / tan(angle_beta); // cot(£])
-            double cot_alpha = 1 / tan(angle_alpha); // cot(alpha)
+            double eij_length = corner_k->edge->length;
+            double eik_length = corner_j->edge->length;
 
-            bool is_obtuse = (angle_i > M_PI / 2 || angle_alpha > M_PI / 2 || angle_beta > M_PI / 2);
+            // Vectors
+            Eigen::Vector3d e0 = vi->pos - corner_j->vertex->pos;
+            Eigen::Vector3d e1 = corner_k->vertex->pos - vi->pos;
+            Eigen::Vector3d e2 = corner_k->vertex->pos - corner_j->vertex->pos;
 
-            if (is_obtuse) {
-                if (angle_i > M_PI / 2) {
-                    area += tri->area / 2.0;
-                }
-                else {
-                    area += tri->area / 4.0;
-                }
-            }
-            else {
-                area += (cot_alpha +  cot_beta) * eij->length / 8.0;
-            }
-        }
-        */
-        for (int j = 0; j < vi->ntris(); j++) {
-            Triangle* tri = vi->tris[j];
-            Vertex* v0 = tri->verts[0];
-            Vertex* v1 = tri->verts[1];
-            Vertex* v2 = tri->verts[2];
-
-            // Identify which one is vi
-            Vertex* vj, * vk;
-            if (vi == v0) { vj = v1; vk = v2; }
-            else if (vi == v1) { vj = v2; vk = v0; }
-            else { vj = v0; vk = v1; }
-
-            Eigen::Vector3d pij = vj->pos - vi->pos;
-            Eigen::Vector3d pik = vk->pos - vi->pos;
-            Eigen::Vector3d pjk = vk->pos - vj->pos;
-            Eigen::Vector3d pkj = vj->pos - vk->pos;
-
-            double angle_i = acos(pij.normalized().dot(pik.normalized()));
-            double angle_j = acos((-pij).normalized().dot(pjk.normalized()));
-            double angle_k = acos((-pik).normalized().dot(pkj.normalized()));
 
             bool is_obtuse = (angle_i > M_PI / 2 || angle_j > M_PI / 2 || angle_k > M_PI / 2);
 
@@ -398,12 +489,12 @@ void MeshProcessor::calcVertArea(Polyhedron* poly) {
                 }
             }
             else {
-                double cot_beta = pik.dot(pjk) / pik.cross(pjk).norm(); // cot(£])
-                double cot_gamma = pij.dot(-pjk) / pij.cross(-pjk).norm(); // cot(£^)
-                area += (pij.squaredNorm() * cot_gamma + pik.squaredNorm() * cot_beta) / 8.0;
+                // Cotangent weights
+                double cot_alpha = e0.dot(e2) / (e0.cross(e2)).norm(); // angle at vk
+                double cot_beta = e1.dot(-e2) / (e1.cross(-e2)).norm(); // angle at vj
+                area += (cot_alpha * e1.squaredNorm() - cot_beta * e0.squaredNorm()) / 8.0;
             }
         }
-        
         vi->area = area;
     }
 }
@@ -436,7 +527,7 @@ double MeshProcessor::calcVolume(Polyhedron* poly) {
         volume += vol;
     }
 
-    return std::abs(volume);  // Use absolute value to return positive volume
+    return volume;  // Use absolute value to return positive volume
 }
 
 /******************************************************************************
@@ -578,7 +669,7 @@ int MeshProcessor::calcValenceDeficit(Vertex* vert)
     }
 
     int valence = static_cast<int>(neighborVerts.size());
-    return valence - 6;
+    return 6 - valence;
 }
 
 /******************************************************************************
@@ -641,12 +732,11 @@ Eigen::Vector3d MeshProcessor::calcMeanCurvatureNormal(Vertex* vert)
 {
     /// Implement 
 	/// Calculate the mean curvature normal of the vertex
+    
     Eigen::Vector3d H(0.0, 0.0, 0.0);
 
     if (!vert || vert->corners.empty())
         return H;
-
-    double mixedArea = 0.0;
 
     for (Corner* c : vert->corners) {
         Triangle* tri = c->tri;
@@ -658,7 +748,7 @@ Eigen::Vector3d MeshProcessor::calcMeanCurvatureNormal(Vertex* vert)
         Eigen::Vector3d vk = c->prev->vertex->pos;
 
         // Vectors
-        Eigen::Vector3d e0 = vj - vi;
+        Eigen::Vector3d e0 = vi - vj;
         Eigen::Vector3d e1 = vk - vi;
         Eigen::Vector3d e2 = vk - vj;
 
@@ -667,11 +757,12 @@ Eigen::Vector3d MeshProcessor::calcMeanCurvatureNormal(Vertex* vert)
         double cot_beta = e1.dot(-e2) / (e1.cross(-e2)).norm(); // angle at vj
 
         // Contribution from edge (i, j) and (i, k)
-        H += (cot_beta * e0 + cot_alpha * e1) * 0.5;
-
+        H += (cot_alpha * e1 - cot_beta * e0 ) ;
     }
 
-    return  H /= (2.0 * vert->area);
+    H /= (2.0 * vert->area);
+    return H;
+
 }
 
 /******************************************************************************
@@ -709,11 +800,20 @@ void MeshProcessor::calcPrincipalCurvature(Polyhedron* poly) {
         Vertex* vert_i = poly->vlist[i];
         /// Implement:
 		/// Calculate the principal curvature of the vertex
-        double k1 = 0.0;
-        double k2 = 0.0;
-        ///
-        vert_i->minPrincCurvature = k1;
-        vert_i->maxPrincCurvature = k2;
+        if (!vert_i) continue;
+
+        double H = vert_i->meanCurvature;
+        double K = vert_i->gaussCurvature;
+
+        double discriminant = H * H - K;
+        if (discriminant < 0) discriminant = 0; // Prevent complex values
+
+        double sqrtD = std::sqrt(discriminant);
+        double k1 = H + sqrtD;
+        double k2 = H - sqrtD;
+
+        vert_i->minPrincCurvature = std::min(k1, k2);
+        vert_i->maxPrincCurvature = std::max(k1, k2);
     }
 }
 
@@ -741,16 +841,52 @@ void MeshProcessor::calcCurvatureTensor(Polyhedron* poly)
 		/// 3. Compute Principal Direction
         /// 
         // Curvature Tensor
-        //vi->tensor(0, 0) = l;
-        //vi->tensor(1, 1) = n;
-        //vi->tensor(0, 1) = m;
-        //vi->tensor(1, 0) = m;
-        // Eigenvectors
-        //vi->princDir2D[0] = v1;
-        //vi->princDir2D[1] = v2;
-        // Principal Direction
-        //vi->princDir3D[0] = d1;
-        //vi->princDir3D[1] = d2;
+        // Find edge with minimum projection distance to the vertex normal
+        Eigen::Vector3d n = vi->normal;
+
+        int N = vi->corners.size();
+
+        // 2. Build system
+        for (int j = 0; j < N; j++) {
+            Corner* corner = vi->corners[j];
+            if (!corner || !corner->next) continue;
+
+            Vertex* vj = corner->next->vertex;
+            Eigen::Vector3d diff = vj->pos - vi->pos;
+
+            double x = diff.dot(e1);
+            double y = diff.dot(e2);
+            double z = diff.dot(n);  // height in normal direction
+
+            matA(j, 0) = 0.5 * x * x;
+            matA(j, 1) = x * y;
+            matA(j, 2) = 0.5 * y * y;
+
+            vecK(j) = z;
+        }
+
+        // 3. Least squares: A * [l, m, n] = k
+        Eigen::Vector3d coeffs = matA.colPivHouseholderQr().solve(vecK);
+        double l = coeffs[0];
+        double m = coeffs[1];
+        double n_val = coeffs[2];
+
+        // 4. Store curvature tensor (symmetric 2x2 matrix)
+        vi->tensor(0, 0) = l;
+        vi->tensor(0, 1) = m;
+        vi->tensor(1, 0) = m;
+        vi->tensor(1, 1) = n_val;
+
+        // 5. Eigen decomposition
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eig(vi->tensor);
+        Eigen::Vector2d v1 = eig.eigenvectors().col(0); // direction
+        Eigen::Vector2d v2 = eig.eigenvectors().col(1);
+        vi->princDir2D[0] = v1;
+        vi->princDir2D[1] = v2;
+
+        // 6. Project back to 3D space
+        vi->princDir3D[0] = v1[0] * e1 + v1[1] * e2;
+        vi->princDir3D[1] = v2[0] * e1 + v2[1] * e2;
     }
 }
 
@@ -777,6 +913,13 @@ void MeshProcessor::calcVertLocalframe(Vertex* vi, Eigen::Vector3d& e1, Eigen::V
 		/// 1. Calculate the projection distance
 		/// 2. Find the edge with the minimum projection distance
         /// 
+        Eigen::Vector3d vec = vj->pos - vi->pos;
+        double proj = abs(vec.dot(vi->normal));
+        if (proj < minProj)
+        {
+            minProj = proj;
+            minVj = vj;
+        }
     }
     // Calculate the local frame perpendicular to the vertex normal 
     if (minVj != NULL)
@@ -784,6 +927,11 @@ void MeshProcessor::calcVertLocalframe(Vertex* vi, Eigen::Vector3d& e1, Eigen::V
         /// Implement:
 		/// Calculate the local frame with vi and minVj
         /// 
+        Eigen::Vector3d vec = minVj->pos - vi->pos;
+        e1 = vec - vec.dot(vi->normal) * vi->normal;
+        e1.normalize();
+        e2 = vi->normal.cross(e1);
+        e2.normalize();
     }
     else
     {

@@ -1,8 +1,10 @@
 ﻿  meshprocessor.cpp
+C:\Users\julianakuei\Desktop\2025 semester\GM\GM_HW3\DiagnosePLY\meshprocessor.cpp(208,50): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
+C:\Users\julianakuei\Desktop\2025 semester\GM\GM_HW3\DiagnosePLY\meshprocessor.cpp(847,35): warning C4267: '正在初始化': 將 'size_t' 轉換為 'int'，資料可能遺失
   正在產生程式碼
-  131 of 8415 functions ( 1.6%) were compiled, the rest were copied from previous compilation.
-    100 functions were new in current compilation
-    424 functions had inline decision re-evaluated but remain unchanged
+  5 of 15538 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    355 functions had inline decision re-evaluated but remain unchanged
   已完成程式碼產生
-  DiagnosePLY.vcxproj -> C:\Users\User\Desktop\2025_semester\Geometric Modeling\assignment3\Release\DiagnosePLY.exe
+  DiagnosePLY.vcxproj -> C:\Users\julianakuei\Desktop\2025 semester\GM\GM_HW3\Release\DiagnosePLY.exe
   已複製 0 個檔案
